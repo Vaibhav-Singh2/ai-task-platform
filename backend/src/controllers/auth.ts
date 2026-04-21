@@ -96,3 +96,33 @@ export const login = TryCatch(async (req: Request, res: Response) => {
     },
   });
 });
+
+export const me = TryCatch(async (req: Request, res: Response) => {
+  const userId = req.user?.id;
+
+  if (!userId) {
+    throw new HttpError(401, "Authentication required");
+  }
+
+  const user = await User.findById(userId).select("_id name email");
+
+  if (!user) {
+    throw new HttpError(404, "User not found");
+  }
+
+  res.status(200).json({
+    success: true,
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    },
+  });
+});
+
+export const logout = TryCatch(async (_req: Request, res: Response) => {
+  res.status(200).json({
+    success: true,
+    message: "Logged out successfully",
+  });
+});

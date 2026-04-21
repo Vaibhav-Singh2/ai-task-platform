@@ -11,6 +11,16 @@ export type AuthResponse = {
   user: AuthUser;
 };
 
+export type MeResponse = {
+  success: boolean;
+  user: AuthUser;
+};
+
+export type LogoutResponse = {
+  success: boolean;
+  message?: string;
+};
+
 export type TaskStatus = "pending" | "running" | "success" | "failed";
 
 export type TaskOperation =
@@ -69,6 +79,13 @@ export type CreateTaskResponse = {
   message?: string;
   task: TaskDetailResponse["task"];
 };
+
+export type UpdateTaskInput = Partial<{
+  title: string;
+  inputText: string;
+  operation: TaskOperation;
+  status: TaskStatus;
+}>;
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5000/api";
@@ -162,6 +179,21 @@ export const authApi = {
       body: JSON.stringify(input),
     });
   },
+  me(token: string) {
+    return apiRequest<MeResponse>("/auth/me", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  },
+  logout(token: string) {
+    return apiRequest<LogoutResponse>("/auth/logout", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  },
 };
 
 export const tasksApi = {
@@ -200,6 +232,18 @@ export const tasksApi = {
   create(token: string, input: CreateTaskInput) {
     return apiRequest<CreateTaskResponse>("/tasks", {
       method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(input),
+    }).then((response) => ({
+      ...response,
+      task: normalizeTask(response.task),
+    }));
+  },
+  update(token: string, id: string, input: UpdateTaskInput) {
+    return apiRequest<CreateTaskResponse>(`/tasks/${id}`, {
+      method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`,
       },

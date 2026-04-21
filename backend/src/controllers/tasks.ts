@@ -130,3 +130,72 @@ export const getTaskById = TryCatch(async (req: Request, res: Response) => {
     task,
   });
 });
+
+export const updateTask = TryCatch(async (req: Request, res: Response) => {
+  const userId = req.user?.id;
+  const { id } = req.params;
+
+  if (!userId) {
+    throw new HttpError(401, "Authentication required");
+  }
+
+  const task = await Task.findOne({ _id: id, userId });
+
+  if (!task) {
+    throw new HttpError(404, "Task not found");
+  }
+
+  const { title, inputText, operation, status } = req.body as {
+    title?: string;
+    inputText?: string;
+    operation?: TaskOperation;
+    status?: TaskStatus;
+  };
+
+  if (title !== undefined) {
+    task.title = title;
+  }
+
+  if (inputText !== undefined) {
+    task.inputText = inputText;
+  }
+
+  if (operation !== undefined) {
+    if (
+      !["uppercase", "lowercase", "reverse", "word_count"].includes(operation)
+    ) {
+      throw new HttpError(400, "Invalid operation value");
+    }
+
+    task.operation = operation;
+  }
+
+  if (status !== undefined) {
+    if (!isValidStatus(status)) {
+      throw new HttpError(400, "Invalid status value");
+    }
+
+    task.status = status;
+  }
+
+  if (inputText !== undefined || operation !== undefined) {
+    task.result = runOperation(task.inputText, task.operation);
+    if (task.status === "pending" || task.status === "running") {
+      task.status = "success";
+    }
+  }
+
+  task.logs.push({
+    level: "info",
+    message: "Task updated",
+    at: new Date(),
+  });
+
+  await task.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Task updated successfully",
+    task,
+  });
+});

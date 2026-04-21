@@ -2,9 +2,14 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useSyncExternalStore, type ReactNode } from "react";
+import {
+  useEffect,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 
-import { session } from "@/lib/api";
+import { authApi, session } from "@/lib/api";
 
 type ShellProps = {
   children: ReactNode;
@@ -21,6 +26,7 @@ const nav = [
 
 export function AppShell({ children, title, subtitle, active }: ShellProps) {
   const router = useRouter();
+  const [isValidated, setIsValidated] = useState(false);
   const token = useSyncExternalStore(
     (listener) => {
       if (typeof window === "undefined") {
@@ -35,17 +41,43 @@ export function AppShell({ children, title, subtitle, active }: ShellProps) {
   );
 
   useEffect(() => {
+    const validate = async () => {
+      if (!token) {
+        router.replace("/login");
+        return;
+      }
+
+      try {
+        await authApi.me(token);
+        setIsValidated(true);
+      } catch {
+        session.clearToken();
+        router.replace("/login");
+      }
+    };
+
     if (!token) {
       router.replace("/login");
+      return;
     }
+
+    void validate();
   }, [router, token]);
 
-  function handleLogout() {
+  async function handleLogout() {
+    if (token) {
+      try {
+        await authApi.logout(token);
+      } catch {
+        // Ignore logout API failures and clear local session anyway.
+      }
+    }
+
     session.clearToken();
-    router.push("/login");
+    router.replace("/login");
   }
 
-  if (!token) {
+  if (!token || !isValidated) {
     return null;
   }
 
