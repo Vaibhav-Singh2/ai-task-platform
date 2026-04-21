@@ -1,6 +1,4 @@
-
 import mongoose from "mongoose";
-
 
 interface IUser {
   name: string;
@@ -10,7 +8,6 @@ interface IUser {
 }
 
 type IUserModel = mongoose.Model<IUser> & {};
-
 
 const schema = new mongoose.Schema({
   name: {
