@@ -17,7 +17,7 @@ const nav = [
 export function AppShell({ children, title, subtitle, active }: ShellProps) {
   return (
     <div className="app-shell lg:grid lg:grid-cols-[260px_1fr]">
-      <aside className="hidden border-r border-[var(--line)] bg-[var(--surface)] p-6 lg:flex lg:flex-col">
+      <aside className="hidden border-r border-(--line) bg-(--surface) p-6 lg:flex lg:flex-col">
         <div className="mb-8">
           <p className="text-xl font-black tracking-tight">Precision Curator</p>
           <p className="muted text-xs font-bold uppercase tracking-[0.18em]">
@@ -40,7 +40,7 @@ export function AppShell({ children, title, subtitle, active }: ShellProps) {
         <div className="mt-auto grid gap-3 pt-6">
           <Link
             href="/tasks/new"
-            className="rounded-xl bg-[var(--primary)] px-4 py-3 text-center text-sm font-extrabold text-white"
+            className="rounded-xl bg-(--primary) px-4 py-3 text-center text-sm font-extrabold text-white"
           >
             New Analysis
           </Link>
@@ -51,7 +51,7 @@ export function AppShell({ children, title, subtitle, active }: ShellProps) {
       </aside>
 
       <div>
-        <header className="sticky top-0 z-10 border-b border-[var(--line)] bg-[color:rgba(246,248,251,0.88)] px-4 py-3 backdrop-blur sm:px-8">
+        <header className="sticky top-0 z-10 border-b border-(--line) bg-[rgba(246,248,251,0.88)] px-4 py-3 backdrop-blur sm:px-8">
           <div className="flex items-center justify-between gap-4">
             <div>
               <h1 className="text-xl font-black tracking-tight sm:text-2xl">
@@ -67,7 +67,7 @@ export function AppShell({ children, title, subtitle, active }: ShellProps) {
                   className={`rounded-lg px-3 py-2 text-xs font-extrabold tracking-[0.14em] uppercase ${
                     active === item.key
                       ? "bg-blue-100 text-blue-800"
-                      : "bg-[var(--surface)] text-[var(--ink-muted)]"
+                      : "bg-(--surface) text-(--ink-muted)"
                   }`}
                 >
                   {item.label}

@@ -37,7 +37,7 @@ export default function DashboardPage() {
               <h2 className="text-2xl font-black tracking-tight">Processing Velocity</h2>
               <p className="muted text-sm">Real-time throughput analysis across active clusters.</p>
             </div>
-            <div className="rounded-lg bg-[var(--surface-soft)] px-3 py-2 text-xs font-extrabold">24H</div>
+            <div className="rounded-lg bg-(--surface-soft) px-3 py-2 text-xs font-extrabold">24H</div>
           </div>
           <div className="grid h-52 grid-cols-12 items-end gap-2">
             {[72, 52, 64, 81, 42, 76, 94, 66, 84, 58, 76, 85].map((v) => (
@@ -46,7 +46,7 @@ export default function DashboardPage() {
           </div>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-700 to-blue-500 p-6 text-white">
+        <Card className="bg-linear-to-brrom-blue-700 to-blue-500 p-6 text-white">
           <h2 className="text-xl font-black tracking-tight">Efficiency Rating</h2>
           <p className="mt-2 text-sm text-blue-100">AI logic paths optimized by 14.2% since last update.</p>
           <p className="mt-8 text-6xl font-black leading-none">98.4%</p>
@@ -63,7 +63,7 @@ export default function DashboardPage() {
         </div>
         <div className="grid gap-3">
           {["Sentiment Analysis Cluster B", "Global Language Sync", "Protocol Firewall Audit"].map((task) => (
-            <article key={task} className="rounded-xl border border-[var(--line)] bg-[var(--surface-soft)] p-4">
+            <article key={task} className="rounded-xl border border-(--line) bg-(--surface-soft) p-4">
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <h3 className="font-extrabold">{task}</h3>

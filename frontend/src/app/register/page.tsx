@@ -4,15 +4,15 @@ import { Button, Input } from "@/components/ui";
 
 export default function RegisterPage() {
   return (
-    <main className="grid min-h-screen bg-[var(--bg)] p-4 sm:p-8 lg:grid-cols-[1.25fr_1fr] lg:p-12">
-      <section className="relative hidden overflow-hidden rounded-3xl border border-[var(--line)] bg-[var(--surface)] p-12 lg:block">
+    <main className="grid min-h-screen bg-background p-4 sm:p-8 lg:grid-cols-[1.25fr_1fr] lg:p-12">
+      <section className="relative hidden overflow-hidden rounded-3xl border border-(--line) bg-(--surface) p-12 lg:block">
         <p className="mb-8 text-xs font-extrabold uppercase tracking-[0.24em] text-blue-700">
           Systems Integrity
         </p>
         <h1 className="text-6xl font-black leading-[0.92] tracking-tight">
           Precision Curator
           <br />
-          <span className="italic text-[var(--primary)]">AI Engine v2.4</span>
+          <span className="italic text-(--primary)">AI Engine v2.4</span>
         </h1>
         <p className="muted mt-6 max-w-xl text-lg">
           Experience next-generation task management where algorithmic
@@ -20,13 +20,13 @@ export default function RegisterPage() {
         </p>
 
         <div className="mt-12 grid grid-cols-2 gap-5 text-sm">
-          <article className="rounded-2xl bg-[var(--surface-soft)] p-5">
+          <article className="rounded-2xl bg-(--surface-soft) p-5">
             <h3 className="font-extrabold">Intelligent Curation</h3>
             <p className="muted mt-2">
               AI parses intent with 99.4% accuracy across multilingual datasets.
             </p>
           </article>
-          <article className="rounded-2xl bg-[var(--surface-soft)] p-5">
+          <article className="rounded-2xl bg-(--surface-soft) p-5">
             <h3 className="font-extrabold">Dynamic Scalability</h3>
             <p className="muted mt-2">
               Auto-optimizing workloads evolve with project complexity.
@@ -59,7 +59,7 @@ export default function RegisterPage() {
               type="password"
               placeholder="••••••••••••"
             />
-            <Button className="bg-[var(--primary)] text-white" type="submit">
+            <Button className="bg-(--primary) text-white" type="submit">
               Register Operator
             </Button>
           </form>

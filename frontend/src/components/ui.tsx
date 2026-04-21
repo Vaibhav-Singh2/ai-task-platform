@@ -38,7 +38,7 @@ export function Input({ label, id, type = "text", placeholder }: FieldProps) {
         id={id}
         type={type}
         placeholder={placeholder}
-        className="w-full rounded-xl border border-[var(--line)] bg-[var(--surface-soft)] px-4 py-3 text-sm outline-none focus:border-[var(--primary)]"
+        className="w-full rounded-xl border border-(--line) bg-(--surface-soft) px-4 py-3 text-sm outline-none focus:border-(--primary)"
       />
     </label>
   );
@@ -54,7 +54,7 @@ export function Textarea({ label, id, placeholder }: Omit<FieldProps, "type">) {
         id={id}
         placeholder={placeholder}
         rows={9}
-        className="w-full rounded-xl border border-[var(--line)] bg-[var(--surface-soft)] px-4 py-3 text-sm outline-none focus:border-[var(--primary)]"
+        className="w-full rounded-xl border border-(--line) bg-(--surface-soft) px-4 py-3 text-sm outline-none focus:border-(--primary)"
       />
     </label>
   );
@@ -74,7 +74,7 @@ export function Select({ label, id, options }: SelectProps) {
       </span>
       <select
         id={id}
-        className="w-full rounded-xl border border-[var(--line)] bg-[var(--surface)] px-4 py-3 text-sm font-semibold outline-none focus:border-[var(--primary)]"
+        className="w-full rounded-xl border border-(--line) bg-(--surface) px-4 py-3 text-sm font-semibold outline-none focus:border-(--primary)"
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>

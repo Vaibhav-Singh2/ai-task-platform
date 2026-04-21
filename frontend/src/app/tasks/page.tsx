@@ -17,22 +17,22 @@ export default function TasksPage() {
             <button className="rounded-full bg-blue-100 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-blue-800">
               All Tasks
             </button>
-            <button className="rounded-full bg-[var(--surface-soft)] px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] muted">
+            <button className="rounded-full bg-(--surface-soft) px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] muted">
               Running
             </button>
-            <button className="rounded-full bg-[var(--surface-soft)] px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] muted">
+            <button className="rounded-full bg-(--surface-soft) px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] muted">
               Pending
             </button>
-            <button className="rounded-full bg-[var(--surface-soft)] px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] muted">
+            <button className="rounded-full bg-(--surface-soft) px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] muted">
               Success
             </button>
-            <button className="rounded-full bg-[var(--surface-soft)] px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] muted">
+            <button className="rounded-full bg-(--surface-soft) px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] muted">
               Failed
             </button>
           </div>
         </Card>
 
-        <Card className="bg-gradient-to-br from-blue-700 to-blue-500 p-5 text-white">
+        <Card className="bg-linear-to-br from-blue-700 to-blue-500 p-5 text-white">
           <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-blue-100">
             Success Rate
           </p>
@@ -43,7 +43,7 @@ export default function TasksPage() {
       <Card className="mt-6 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full text-left">
-            <thead className="bg-[var(--surface-soft)]">
+            <thead className="bg-(--surface-soft)">
               <tr>
                 <th className="px-6 py-4 text-xs font-extrabold uppercase tracking-[0.14em] muted">
                   Task Title
@@ -64,18 +64,18 @@ export default function TasksPage() {
             </thead>
             <tbody>
               {tasks.map((task) => (
-                <tr key={task.id} className="border-t border-[var(--line)]">
+                <tr key={task.id} className="border-t border-(--line)">
                   <td className="px-6 py-5">
                     <p className="font-extrabold">{task.title}</p>
                     <p className="muted text-xs">ID: {task.id}</p>
                   </td>
-                  <td className="px-6 py-5 text-sm font-semibold text-[var(--ink-muted)]">
+                  <td className="px-6 py-5 text-sm font-semibold text-(--ink-muted)">
                     {task.operation}
                   </td>
                   <td className="px-6 py-5">
                     <StatusBadge status={task.status} />
                   </td>
-                  <td className="px-6 py-5 text-sm text-[var(--ink-muted)]">
+                  <td className="px-6 py-5 text-sm text-(--ink-muted)">
                     {task.createdAt}
                   </td>
                   <td className="px-6 py-5 text-right">
