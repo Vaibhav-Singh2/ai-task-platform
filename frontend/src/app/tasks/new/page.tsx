@@ -1,5 +1,11 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState, type FormEvent } from "react";
+
 import { AppShell } from "@/components/app-shell";
-import { Button, Card, Input, Select, Textarea } from "@/components/ui";
+import { Button, Card } from "@/components/ui";
+import { session, tasksApi, type TaskOperation } from "@/lib/api";
 
 const operations = [
   { value: "uppercase", label: "Uppercase" },
@@ -9,6 +15,45 @@ const operations = [
 ];
 
 export default function NewTaskPage() {
+  const router = useRouter();
+  const [title, setTitle] = useState("");
+  const [inputText, setInputText] = useState("");
+  const [operation, setOperation] = useState<TaskOperation>("uppercase");
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+
+    const token = session.getToken();
+
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await tasksApi.create(token, {
+        title,
+        inputText,
+        operation,
+      });
+      router.push(`/tasks/${response.task.id}`);
+      router.refresh();
+    } catch (submitError) {
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : "Failed to create task",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
     <AppShell
       active="create"
@@ -17,24 +62,54 @@ export default function NewTaskPage() {
     >
       <section className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <Card className="p-6 sm:p-8">
-          <div className="grid gap-6">
-            <Input
-              id="title"
-              label="Task Title"
-              placeholder="Marketing Copy Sanitization"
-            />
-            <Textarea
-              id="input"
-              label="Input Text"
-              placeholder="Paste your raw input text for processing..."
-            />
-          </div>
+          <form className="grid gap-6" onSubmit={handleSubmit}>
+            <label className="grid gap-2">
+              <span className="text-[11px] font-extrabold uppercase tracking-[0.15em] muted">
+                Task Title
+              </span>
+              <input
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                placeholder="Marketing Copy Sanitization"
+                className="w-full rounded-xl border border-(--line) bg-(--surface-soft) px-4 py-3 text-sm outline-none focus:border-(--primary)"
+              />
+            </label>
+            <label className="grid gap-2">
+              <span className="text-[11px] font-extrabold uppercase tracking-[0.15em] muted">
+                Input Text
+              </span>
+              <textarea
+                rows={10}
+                value={inputText}
+                onChange={(event) => setInputText(event.target.value)}
+                placeholder="Paste your raw input text for processing..."
+                className="w-full rounded-xl border border-(--line) bg-(--surface-soft) px-4 py-3 text-sm outline-none focus:border-(--primary)"
+              />
+            </label>
+          </form>
         </Card>
 
         <div className="grid gap-6">
           <Card className="p-6">
-            <div className="grid gap-5">
-              <Select id="operation" label="Operation" options={operations} />
+            <form className="grid gap-5" onSubmit={handleSubmit}>
+              <label className="grid gap-2">
+                <span className="text-[11px] font-extrabold uppercase tracking-[0.15em] muted">
+                  Operation
+                </span>
+                <select
+                  value={operation}
+                  onChange={(event) =>
+                    setOperation(event.target.value as TaskOperation)
+                  }
+                  className="w-full rounded-xl border border-(--line) bg-(--surface) px-4 py-3 text-sm font-semibold outline-none"
+                >
+                  {operations.map((item) => (
+                    <option key={item.value} value={item.value}>
+                      {item.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <div>
                 <div className="mb-2 flex items-center justify-between text-xs font-extrabold uppercase tracking-[0.14em] muted">
                   <span>Complexity Score</span>
@@ -44,10 +119,13 @@ export default function NewTaskPage() {
                   <div className="h-full w-1/3 rounded-full bg-(--primary)" />
                 </div>
               </div>
+              {error ? (
+                <p className="text-sm font-semibold text-red-600">{error}</p>
+              ) : null}
               <Button className="bg-(--primary) text-white" type="submit">
-                Run Task
+                {isSubmitting ? "Running..." : "Run Task"}
               </Button>
-            </div>
+            </form>
           </Card>
 
           <Card className="p-6">

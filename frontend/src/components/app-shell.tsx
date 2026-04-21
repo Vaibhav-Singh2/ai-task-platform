@@ -1,5 +1,10 @@
+"use client";
+
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useSyncExternalStore, type ReactNode } from "react";
+
+import { session } from "@/lib/api";
 
 type ShellProps = {
   children: ReactNode;
@@ -15,6 +20,35 @@ const nav = [
 ] as const;
 
 export function AppShell({ children, title, subtitle, active }: ShellProps) {
+  const router = useRouter();
+  const token = useSyncExternalStore(
+    (listener) => {
+      if (typeof window === "undefined") {
+        return () => undefined;
+      }
+
+      window.addEventListener("storage", listener);
+      return () => window.removeEventListener("storage", listener);
+    },
+    session.getToken,
+    () => "",
+  );
+
+  useEffect(() => {
+    if (!token) {
+      router.replace("/login");
+    }
+  }, [router, token]);
+
+  function handleLogout() {
+    session.clearToken();
+    router.push("/login");
+  }
+
+  if (!token) {
+    return null;
+  }
+
   return (
     <div className="app-shell lg:grid lg:grid-cols-[260px_1fr]">
       <aside className="hidden border-r border-(--line) bg-(--surface) p-6 lg:flex lg:flex-col">
@@ -44,9 +78,13 @@ export function AppShell({ children, title, subtitle, active }: ShellProps) {
           >
             New Analysis
           </Link>
-          <Link className="sidebar-link" href="/login">
+          <button
+            type="button"
+            className="sidebar-link text-left"
+            onClick={handleLogout}
+          >
             Logout
-          </Link>
+          </button>
         </div>
       </aside>
 
