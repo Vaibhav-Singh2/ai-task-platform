@@ -1,31 +1,31 @@
 import { NextFunction, Request, Response } from "express";
 import HttpError from "@/utils/errorHandler.js";
-import { envMode } from "@/app.js";
 
 export const errorMiddleware = (
-  err: HttpError,
+  err: HttpError | Error,
   req: Request,
   res: Response,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: NextFunction,
 ) => {
-  err.message ||= "Internal Server Error";
-  err.statusCode = err.statusCode || 500;
+  const statusCode = err instanceof HttpError ? err.statusCode : 500;
+  const message = err.message || "Internal Server Error";
+  const envMode = process.env.NODE_ENV?.trim() || "DEVELOPMENT";
 
   const response: {
     success: boolean;
     message: string;
-    error?: HttpError;
+    error?: string;
   } = {
     success: false,
-    message: err.message,
+    message,
   };
 
   if (envMode === "DEVELOPMENT") {
-    response.error = err;
+    response.error = err.stack;
   }
 
-  return res.status(err.statusCode).json(response);
+  return res.status(statusCode).json(response);
 };
 
 type ControllerType = (
