@@ -26,7 +26,12 @@ const nav = [
 
 export function AppShell({ children, title, subtitle, active }: ShellProps) {
   const router = useRouter();
-  const [isValidated, setIsValidated] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    const timeout = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(timeout);
+  }, []);
+
   const token = useSyncExternalStore(
     (listener) => {
       if (typeof window === "undefined") {
@@ -41,6 +46,8 @@ export function AppShell({ children, title, subtitle, active }: ShellProps) {
   );
 
   useEffect(() => {
+    if (!mounted) return; // Wait for hydration so token isn't incorrectly ""
+
     const validate = async () => {
       if (!token) {
         router.replace("/login");
@@ -49,20 +56,14 @@ export function AppShell({ children, title, subtitle, active }: ShellProps) {
 
       try {
         await authApi.me(token);
-        setIsValidated(true);
       } catch {
         session.clearToken();
         router.replace("/login");
       }
     };
 
-    if (!token) {
-      router.replace("/login");
-      return;
-    }
-
     void validate();
-  }, [router, token]);
+  }, [router, token, mounted]);
 
   async function handleLogout() {
     if (token) {
@@ -77,8 +78,8 @@ export function AppShell({ children, title, subtitle, active }: ShellProps) {
     router.replace("/login");
   }
 
-  if (!token || !isValidated) {
-    return null;
+  if (!mounted) {
+    return null; // Wait for client hydration
   }
 
   return (

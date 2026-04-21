@@ -5,13 +5,10 @@ import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { Card, StatusBadge } from "@/components/ui";
 import { session, tasksApi, type TaskItem } from "@/lib/api";
+import { useParams } from "next/navigation";
 
-type Props = {
-  params: { id: string };
-};
-
-export default function TaskDetailsPage({ params }: Props) {
-  const { id } = params;
+export default function TaskDetailsPage() {
+  const { id }: { id: string } = useParams();
   const [task, setTask] = useState<TaskItem | null>(null);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -24,22 +21,40 @@ export default function TaskDetailsPage({ params }: Props) {
       return;
     }
 
+    let isSubscribed = true;
+    let timeoutId: ReturnType<typeof setTimeout>;
+
     const load = async () => {
       try {
         const response = await tasksApi.detail(token, id);
+        if (!isSubscribed) return;
+        
         setTask(response.task);
+        
+        if (response.task.status === "pending" || response.task.status === "running") {
+          timeoutId = setTimeout(load, 2000);
+        }
       } catch (loadError) {
-        setError(
-          loadError instanceof Error
-            ? loadError.message
-            : "Unable to load task",
-        );
+        if (isSubscribed) {
+          setError(
+            loadError instanceof Error
+              ? loadError.message
+              : "Unable to load task",
+          );
+        }
       } finally {
-        setIsLoading(false);
+        if (isSubscribed) {
+          setIsLoading(false);
+        }
       }
     };
 
     void load();
+
+    return () => {
+      isSubscribed = false;
+      clearTimeout(timeoutId);
+    };
   }, [id]);
 
   const timeline = useMemo(() => {
@@ -50,13 +65,13 @@ export default function TaskDetailsPage({ params }: Props) {
     return [
       {
         step: "Task Created",
-        time: task.createdAt,
-        state: task.status,
+        time: task.createdAt ? new Date(task.createdAt).toLocaleString() : "",
+        state: "success",
         detail: task.title,
       },
       {
-        step: "Operation",
-        time: task.operation,
+        step: `Operation: ${task.operation}`,
+        time: task.logs && task.logs.length > 0 && task.logs[task.logs.length - 1].at ? new Date(task.logs[task.logs.length - 1].at!).toLocaleString() : "Pending",
         state: task.status,
         detail: task.inputText ?? "",
       },
@@ -81,16 +96,16 @@ export default function TaskDetailsPage({ params }: Props) {
           ) : (
             <dl className="mt-5 grid gap-4 text-sm">
               <div className="flex items-center justify-between border-b border-(--line) pb-3">
-                <dt className="muted">Task Engine</dt>
-                <dd className="font-extrabold">Curator-v4.2</dd>
+                <dt className="muted">Title</dt>
+                <dd className="font-extrabold">{task?.title}</dd>
               </div>
               <div className="flex items-center justify-between border-b border-(--line) pb-3">
-                <dt className="muted">Priority</dt>
-                <dd className="font-extrabold text-(--error)">High</dd>
+                <dt className="muted">Operation</dt>
+                <dd className="font-extrabold capitalize">{task?.operation}</dd>
               </div>
               <div className="flex items-center justify-between border-b border-(--line) pb-3">
-                <dt className="muted">Source Format</dt>
-                <dd className="font-extrabold">JSON / Vector-DB</dd>
+                <dt className="muted">Input Text</dt>
+                <dd className="font-extrabold truncate max-w-50" title={task?.inputText}>{task?.inputText}</dd>
               </div>
               <div className="flex items-center justify-between">
                 <dt className="muted">Status</dt>
@@ -132,13 +147,19 @@ export default function TaskDetailsPage({ params }: Props) {
             Logs
           </h2>
           <div className="grid gap-2 overflow-y-auto pr-1">
-            <p>[10:42:01] INFO Bootstrapping agent node L-9...</p>
-            <p>[10:42:04] INFO Connected to vector-db cluster-primary</p>
-            <p>
-              [10:44:02] WARN Latency detected in node_sh-02; rerouting traffic
-            </p>
-            <p>[10:45:10] INFO Embedding process initiated model=Ada-002</p>
-            <p>[10:55:00] INFO Progress updated to 72%</p>
+            {task?.logs && task.logs.length > 0 ? (
+              task.logs.map((log, index) => {
+                const timeStr = log.at ? new Date(log.at).toLocaleTimeString() : "";
+                return (
+                  <p key={index}>
+                    {timeStr && `[${timeStr}] `}
+                    <span className="uppercase font-semibold">{log.level}</span> {log.message}
+                  </p>
+                );
+              })
+            ) : (
+              <p className="text-slate-500 italic">No logs available.</p>
+            )}
           </div>
         </Card>
 
@@ -149,22 +170,22 @@ export default function TaskDetailsPage({ params }: Props) {
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <article className="rounded-xl bg-(--surface-soft) p-4">
               <p className="muted text-xs font-extrabold uppercase tracking-[0.14em]">
-                Confidence Score
+                Operation
               </p>
-              <p className="mt-2 text-3xl font-black text-blue-700">94.8%</p>
+              <p className="mt-2 text-xl font-black text-blue-700 capitalize">{task?.operation}</p>
             </article>
             <article className="rounded-xl bg-(--surface-soft) p-4">
               <p className="muted text-xs font-extrabold uppercase tracking-[0.14em]">
-                Anomalies Found
+                Result Length
               </p>
-              <p className="mt-2 text-3xl font-black">12</p>
+              <p className="mt-2 text-xl font-black">{task?.result?.length ?? 0}</p>
             </article>
           </div>
           <article className="mt-4 rounded-xl border-l-4 border-blue-600 bg-blue-50 p-4">
             <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-blue-700">
-              Initial Insight
+              {task?.status === "success" ? "Result Output" : "Pending Output"}
             </p>
-            <p className="mt-2 text-sm text-(--ink-muted)">
+            <p className="mt-2 text-sm text-(--ink-muted) wrap-break-word whitespace-pre-wrap">
               {task?.result || "No result available yet."}
             </p>
           </article>
