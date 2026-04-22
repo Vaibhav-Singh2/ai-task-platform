@@ -3,12 +3,14 @@
 ## Overview
 
 The Worker Service is a Python-based background processor responsible
-for executing tasks asynchronously from the Redis queue. It ensures
-tasks are processed reliably and updates their status in MongoDB.
+for executing tasks asynchronously from the Redis queue. It leverages
+OpenAI's language models to process text workflows intelligently and
+updates their status in MongoDB.
 
 ## Tech Stack
 
 -   Python
+-   OpenAI API
 -   Redis (Queue)
 -   MongoDB (via PyMongo)
 -   Docker
@@ -19,11 +21,11 @@ tasks are processed reliably and updates their status in MongoDB.
 
 -   Consume tasks from Redis queue
 -   Update task status: pending → running → success/failed
--   Perform text operations:
-    -   Uppercase
-    -   Lowercase
-    -   Reverse string
-    -   Word count
+-   Perform text operations via OpenAI prompts:
+    -   Uppercase transformation
+    -   Lowercase transformation
+    -   Reverse string logic
+    -   Word count calculation
 -   Store results and logs in MongoDB
 
 ------------------------------------------------------------------------
@@ -43,11 +45,11 @@ tasks are processed reliably and updates their status in MongoDB.
 ## Supported Operations
 
   Operation    Description
-  ------------ ---------------------------
-  uppercase    Convert text to uppercase
-  lowercase    Convert text to lowercase
-  reverse      Reverse the string
-  word_count   Count number of words
+  ------------ -----------------------------------------------------
+  uppercase    Prompt OpenAI to convert text to uppercase
+  lowercase    Prompt OpenAI to convert text to lowercase
+  reverse      Prompt OpenAI to reverse the given text string
+  word_count   Prompt OpenAI to count the number of words
 
 ------------------------------------------------------------------------
 
@@ -71,6 +73,7 @@ tasks are processed reliably and updates their status in MongoDB.
     MONGO_URI=mongodb://localhost:27017/tasks
     QUEUE_NAME=task_queue
     WORKER_CONCURRENCY=2
+    OPENAI_API_KEY=sk-proj-...
 
 ------------------------------------------------------------------------
 

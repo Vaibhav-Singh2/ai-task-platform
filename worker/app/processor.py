@@ -46,7 +46,7 @@ def process_task(operation: str, input_text: str) -> ProcessedTask:
             system_prompt = "You are a helpful assistant. Count the number of words in the given text. Return ONLY the number as a string."
 
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": input_text}

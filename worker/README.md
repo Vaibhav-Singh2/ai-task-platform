@@ -1,6 +1,6 @@
 # Worker Service
 
-Python worker that consumes tasks from Redis, processes text operations, and updates task state in MongoDB.
+Python worker that consumes tasks from Redis, processes text operations using OpenAI's API, and updates task state in MongoDB.
 
 ## Environment
 
@@ -10,6 +10,7 @@ Python worker that consumes tasks from Redis, processes text operations, and upd
 - WORKER_CONCURRENCY=2
 - WORKER_POLL_TIMEOUT=5
 - WORKER_RETRY_ATTEMPTS=3
+- OPENAI_API_KEY=sk-proj-...
 
 ## Run Locally
 

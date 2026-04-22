@@ -49,11 +49,11 @@ User → Frontend → Backend → Redis Queue → Worker → MongoDB → Fronten
 
 -   Worker pulls job from queue
 -   Updates task status to `running`
--   Executes operation:
-    -   uppercase → convert to uppercase
-    -   lowercase → convert to lowercase
-    -   reverse → reverse string
-    -   word_count → count words
+-   Executes operation via OpenAI API (`gpt-4o-mini`):
+    -   uppercase → prompts AI to convert to uppercase
+    -   lowercase → prompts AI to convert to lowercase
+    -   reverse → prompts AI to reverse string
+    -   word_count → prompts AI to count words
 
 ------------------------------------------------------------------------
 
