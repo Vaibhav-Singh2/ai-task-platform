@@ -7,12 +7,6 @@ import { AppShell } from "@/components/app-shell";
 import { Card, StatusBadge } from "@/components/ui";
 import { session, tasksApi, type TaskItem } from "@/lib/api";
 
-const fallbackStats = {
-  total: 1284,
-  running: 12,
-  completed: 1268,
-  failed: 4,
-};
 
 export default function DashboardPage() {
   const [tasks, setTasks] = useState<TaskItem[]>([]);
@@ -47,7 +41,7 @@ export default function DashboardPage() {
 
   const stats = useMemo(() => {
     if (!tasks.length) {
-      return fallbackStats;
+      return { total: 0, running: 0, completed: 0, failed: 0 };
     }
 
     return {
@@ -56,6 +50,29 @@ export default function DashboardPage() {
       completed: tasks.filter((task) => task.status === "success").length,
       failed: tasks.filter((task) => task.status === "failed").length,
     };
+  }, [tasks]);
+
+  const velocityData = useMemo(() => {
+    if (!tasks.length) return Array(12).fill(0);
+    const now = new Date();
+    const buckets = new Array(12).fill(0);
+    tasks.forEach(task => {
+      const d = new Date(task.createdAt);
+      const diffHours = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60));
+      if (diffHours < 12 && diffHours >= 0) {
+        buckets[11 - diffHours] += 1;
+      }
+    });
+    const maxVal = Math.max(...buckets, 1);
+    return buckets.map(val => (val / maxVal) * 100);
+  }, [tasks]);
+
+  const efficiencyRating = useMemo(() => {
+    if (!tasks.length) return "100.0";
+    const completed = tasks.filter(t => t.status === "success").length;
+    const failed = tasks.filter(t => t.status === "failed").length;
+    if (completed + failed === 0) return "100.0";
+    return ((completed / (completed + failed)) * 100).toFixed(1);
   }, [tasks]);
 
   return (
@@ -107,32 +124,32 @@ export default function DashboardPage() {
                 Processing Velocity
               </h2>
               <p className="muted text-sm">
-                Real-time throughput analysis across active clusters.
+                Real-time throughput analysis across active clusters (Last 12 Hours).
               </p>
             </div>
             <div className="rounded-lg bg-(--surface-soft) px-3 py-2 text-xs font-extrabold">
-              24H
+              12H
             </div>
           </div>
           <div className="grid h-52 grid-cols-12 items-end gap-2">
-            {[72, 52, 64, 81, 42, 76, 94, 66, 84, 58, 76, 85].map((v) => (
+            {velocityData.map((v, i) => (
               <div
-                key={v}
-                style={{ height: `${v}%` }}
-                className="rounded-t-lg bg-blue-200"
+                key={i}
+                style={{ height: `${Math.max(v, 2)}%` }}
+                className="rounded-t-lg bg-blue-200 transition-all duration-500"
               />
             ))}
           </div>
         </Card>
 
-        <Card className="bg-linear-to-br from-blue-700 to-blue-500 p-6 text-white">
+        <Card className="bg-linear-to-br from-blue-700 to-blue-500 p-6 text-white border-transparent">
           <h2 className="text-xl font-black tracking-tight">
             Efficiency Rating
           </h2>
           <p className="mt-2 text-sm text-blue-100">
-            AI logic paths optimized by 14.2% since last update.
+            Success rate of AI logic paths based on processed tasks.
           </p>
-          <p className="mt-8 text-6xl font-black leading-none">98.4%</p>
+          <p className="mt-8 text-6xl font-black leading-none">{efficiencyRating}%</p>
           <p className="mt-3 text-xs font-extrabold uppercase tracking-[0.18em] text-blue-100">
             Optimal State
           </p>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { AppShell } from "@/components/app-shell";
 import { Card, StatusBadge } from "@/components/ui";
@@ -40,6 +40,14 @@ export default function TasksPage() {
     void load();
   }, [search, status]);
 
+  const successRate = useMemo(() => {
+    if (!tasks.length) return "100.0";
+    const completed = tasks.filter((t) => t.status === "success").length;
+    const failed = tasks.filter((t) => t.status === "failed").length;
+    if (completed + failed === 0) return "100.0";
+    return ((completed / (completed + failed)) * 100).toFixed(1);
+  }, [tasks]);
+
   return (
     <AppShell
       active="tasks"
@@ -57,42 +65,42 @@ export default function TasksPage() {
             />
             <button
               onClick={() => setStatus("all")}
-              className="rounded-full bg-blue-100 px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] text-blue-800"
+              className={`rounded-full px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] ${status === "all" ? "bg-blue-100 text-blue-800" : "bg-(--surface-soft) muted"}`}
             >
               All Tasks
             </button>
             <button
               onClick={() => setStatus("running")}
-              className="rounded-full bg-(--surface-soft) px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] muted"
+              className={`rounded-full px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] ${status === "running" ? "bg-blue-100 text-blue-800" : "bg-(--surface-soft) muted"}`}
             >
               Running
             </button>
             <button
               onClick={() => setStatus("pending")}
-              className="rounded-full bg-(--surface-soft) px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] muted"
+              className={`rounded-full px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] ${status === "pending" ? "bg-blue-100 text-blue-800" : "bg-(--surface-soft) muted"}`}
             >
               Pending
             </button>
             <button
               onClick={() => setStatus("success")}
-              className="rounded-full bg-(--surface-soft) px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] muted"
+              className={`rounded-full px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] ${status === "success" ? "bg-blue-100 text-blue-800" : "bg-(--surface-soft) muted"}`}
             >
               Success
             </button>
             <button
               onClick={() => setStatus("failed")}
-              className="rounded-full bg-(--surface-soft) px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] muted"
+              className={`rounded-full px-4 py-2 text-xs font-extrabold uppercase tracking-[0.14em] ${status === "failed" ? "bg-blue-100 text-blue-800" : "bg-(--surface-soft) muted"}`}
             >
               Failed
             </button>
           </div>
         </Card>
 
-        <Card className="bg-linear-to-br from-blue-700 to-blue-500 p-5 text-white">
+        <Card className="bg-linear-to-br from-blue-700 to-blue-500 p-5 text-white border-transparent">
           <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-blue-100">
             Success Rate
           </p>
-          <p className="mt-2 text-4xl font-black">98.4%</p>
+          <p className="mt-2 text-4xl font-black">{successRate}%</p>
         </Card>
       </section>
 

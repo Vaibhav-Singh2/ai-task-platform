@@ -105,12 +105,6 @@ export function AppShell({ children, title, subtitle, active }: ShellProps) {
         </nav>
 
         <div className="mt-auto grid gap-3 pt-6">
-          <Link
-            href="/tasks/new"
-            className="rounded-xl bg-(--primary) px-4 py-3 text-center text-sm font-extrabold text-white"
-          >
-            New Analysis
-          </Link>
           <button
             type="button"
             className="sidebar-link text-left"
@@ -147,8 +141,32 @@ export function AppShell({ children, title, subtitle, active }: ShellProps) {
             </div>
           </div>
         </header>
-        <main className="p-4 sm:p-8">{children}</main>
+        <main className="p-4 pb-24 sm:p-8 sm:pb-8">{children}</main>
       </div>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 z-20 flex border-t border-(--line) bg-[rgba(255,255,255,0.9)] p-2 backdrop-blur lg:hidden pb-safe">
+        {nav.map((item) => (
+          <Link
+            key={item.key}
+            href={item.href}
+            className={`flex-1 flex items-center justify-center rounded-lg py-3 text-center text-[10px] font-extrabold uppercase tracking-wider sm:tracking-widest ${
+              active === item.key
+                ? "bg-blue-100 text-blue-800"
+                : "text-(--ink-muted) hover:bg-(--surface-soft)"
+            }`}
+          >
+            {item.label}
+          </Link>
+        ))}
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="flex-1 flex items-center justify-center rounded-lg py-3 text-center text-[10px] font-extrabold uppercase tracking-wider sm:tracking-widest text-red-600 hover:bg-red-50"
+        >
+          Logout
+        </button>
+      </nav>
     </div>
   );
 }

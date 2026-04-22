@@ -113,10 +113,15 @@ export default function NewTaskPage() {
               <div>
                 <div className="mb-2 flex items-center justify-between text-xs font-extrabold uppercase tracking-[0.14em] muted">
                   <span>Complexity Score</span>
-                  <span className="text-blue-700">Low</span>
+                  <span className="text-blue-700">
+                    {inputText.length > 500 ? "High" : inputText.length > 100 ? "Medium" : "Low"}
+                  </span>
                 </div>
                 <div className="h-2 overflow-hidden rounded-full bg-(--surface-strong)">
-                  <div className="h-full w-1/3 rounded-full bg-(--primary)" />
+                  <div 
+                    className="h-full rounded-full bg-(--primary) transition-all duration-300"
+                    style={{ width: inputText.length > 500 ? "100%" : inputText.length > 100 ? "66%" : "33%" }}
+                  />
                 </div>
               </div>
               {error ? (
