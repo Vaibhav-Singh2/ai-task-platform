@@ -46,3 +46,20 @@ class RedisQueue:
             raise ValueError("Invalid queue payload: taskId and operation are required")
 
         return QueueMessage(task_id=task_id, operation=operation, input_text=input_text)
+
+    def push_dlq(self, message: QueueMessage, error: str) -> None:
+        from datetime import datetime, timezone
+        dlq_name = f"{self.queue_name}_dlq"
+        payload = json.dumps({
+            "taskId": message.task_id,
+            "operation": message.operation,
+            "input": message.input_text,
+            "error": error,
+            "failedAt": datetime.now(timezone.utc).isoformat()
+        })
+        self.client.rpush(dlq_name, payload)
+
+    def publish_update(self, task_id: str, status: str) -> None:
+        channel = f"{self.queue_name}_updates"
+        payload = json.dumps({"taskId": str(task_id), "status": status})
+        self.client.publish(channel, payload)

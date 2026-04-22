@@ -8,12 +8,17 @@ import { TryCatch } from "@/middlewares/error.js";
 export const isAuthenticated = TryCatch(
   async (req: Request, _res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
+    let token = "";
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return next(new HttpError(401, "Authentication required"));
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      token = authHeader.split(" ")[1];
+    } else if (req.query.token) {
+      token = req.query.token as string;
     }
 
-    const token = authHeader.split(" ")[1];
+    if (!token) {
+      return next(new HttpError(401, "Authentication required"));
+    }
     const jwtSecret = process.env.JWT_SECRET;
 
     if (!jwtSecret) {

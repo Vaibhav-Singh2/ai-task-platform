@@ -22,7 +22,6 @@ export default function TaskDetailsPage() {
     }
 
     let isSubscribed = true;
-    let timeoutId: ReturnType<typeof setTimeout>;
 
     const load = async () => {
       try {
@@ -30,10 +29,6 @@ export default function TaskDetailsPage() {
         if (!isSubscribed) return;
         
         setTask(response.task);
-        
-        if (response.task.status === "pending" || response.task.status === "running") {
-          timeoutId = setTimeout(load, 2000);
-        }
       } catch (loadError) {
         if (isSubscribed) {
           setError(
@@ -51,9 +46,22 @@ export default function TaskDetailsPage() {
 
     void load();
 
+    const eventSource = new EventSource(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/tasks/stream?token=${token}`);
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.taskId === id) {
+          void load();
+        }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (e) {
+        // ignore
+      }
+    };
+
     return () => {
       isSubscribed = false;
-      clearTimeout(timeoutId);
+      eventSource.close();
     };
   }, [id]);
 

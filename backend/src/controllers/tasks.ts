@@ -4,7 +4,7 @@ import { TryCatch } from "@/middlewares/error.js";
 import HttpError from "@/utils/errorHandler.js";
 import { Task, type TaskOperation, type TaskStatus } from "@/models/task.js";
 
-import { redisClient } from "@/lib/redis.js";
+import { redisClient, redisSubscriber } from "@/lib/redis.js";
 
 const isValidStatus = (status: string): status is TaskStatus => {
   return ["pending", "running", "success", "failed"].includes(status);
@@ -197,5 +197,41 @@ export const updateTask = TryCatch(async (req: Request, res: Response) => {
     success: true,
     message: "Task updated successfully",
     task,
+  });
+});
+
+export const streamTasks = TryCatch(async (req: Request, res: Response) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    throw new HttpError(401, "Authentication required");
+  }
+
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+
+  // Keep connection alive
+  const pingInterval = setInterval(() => {
+    res.write(": keep-alive\n\n");
+  }, 30000);
+
+  const queueName = process.env.QUEUE_NAME || "task_queue";
+  const channel = `${queueName}_updates`;
+
+  const listener = (message: string) => {
+    try {
+      const data = JSON.parse(message);
+      res.write(`data: ${JSON.stringify(data)}\n\n`);
+    } catch (err) {
+      console.error("Error parsing pub/sub message", err);
+    }
+  };
+
+  await redisSubscriber.subscribe(channel, listener);
+
+  req.on("close", async () => {
+    clearInterval(pingInterval);
+    await redisSubscriber.unsubscribe(channel, listener);
+    res.end();
   });
 });

@@ -37,7 +37,7 @@ export const register = TryCatch(async (req: Request, res: Response) => {
     throw new HttpError(409, "Email is already registered");
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const hashedPassword = await bcrypt.hash(password, 12);
 
   const user = await User.create({
     name,

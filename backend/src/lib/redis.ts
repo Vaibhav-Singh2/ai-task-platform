@@ -11,9 +11,16 @@ export const redisClient = createClient({
 
 redisClient.on("error", (err) => console.log("Redis Client Error", err));
 
+export const redisSubscriber = redisClient.duplicate();
+redisSubscriber.on("error", (err) => console.log("Redis Subscriber Error", err));
+
 export const connectRedis = async () => {
   if (!redisClient.isOpen) {
     await redisClient.connect();
     console.log(`Connected to Redis at ${redisUrl}`);
+  }
+  if (!redisSubscriber.isOpen) {
+    await redisSubscriber.connect();
+    console.log(`Redis Subscriber connected`);
   }
 };

@@ -92,5 +92,7 @@ const taskSchema = new mongoose.Schema<ITask>(
 );
 
 taskSchema.index({ userId: 1, createdAt: -1 });
+taskSchema.index({ title: "text", inputText: "text" });
+taskSchema.index({ createdAt: 1 }, { expireAfterSeconds: 2592000 }); // 30 days
 
 export const Task = mongoose.model<ITask>("Task", taskSchema);

@@ -5,6 +5,7 @@ import {
   getTaskById,
   getTasks,
   updateTask,
+  streamTasks,
 } from "@/controllers/tasks.js";
 import { isAuthenticated } from "@/middlewares/auth.js";
 
@@ -12,6 +13,7 @@ const router = Router();
 
 router.use(isAuthenticated);
 
+router.get("/stream", streamTasks);
 router.post("/", createTask);
 router.get("/", getTasks);
 router.get("/:id", getTaskById);

@@ -9,6 +9,7 @@ import dotenv from "dotenv";
 import { rateLimit } from "express-rate-limit";
 import authRoutes from "@/routes/auth.js";
 import taskRoutes from "@/routes/tasks.js";
+import mongoSanitize from "express-mongo-sanitize";
 
 dotenv.config();
 
@@ -35,6 +36,7 @@ app.use(
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(mongoSanitize());
 app.use(cors({ origin: process.env.CORS_ORIGIN || "*", credentials: true }));
 app.use(morgan("dev"));
 app.use("/api", apiLimiter);

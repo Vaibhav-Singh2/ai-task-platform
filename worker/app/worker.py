@@ -118,7 +118,8 @@ class WorkerService:
                 )
                 if attempt >= self.retry_attempts:
                     self.mark_failed(task_id, last_error)
-                    print(f"Task {message.task_id} failed: {last_error}")
+                    self.queue.push_dlq(message, last_error)
+                    print(f"Task {message.task_id} failed permanently, pushed to DLQ: {last_error}")
                     return
 
     def resolve_task_id(self, task_id: str) -> ObjectId | str | None:
@@ -144,6 +145,7 @@ class WorkerService:
                 },
             },
         )
+        self.queue.publish_update(str(task_id), "running")
 
     def mark_success(
         self,
@@ -162,6 +164,7 @@ class WorkerService:
                 "$push": {"logs": {"$each": logs}},
             },
         )
+        self.queue.publish_update(str(task_id), "success")
 
     def mark_failed(self, task_id: ObjectId | str, error_message: str) -> None:
         self.tasks.update_one(
@@ -180,6 +183,7 @@ class WorkerService:
                 },
             },
         )
+        self.queue.publish_update(str(task_id), "failed")
 
     def append_log(self, task_id: ObjectId | str, log_entry: dict[str, object]) -> None:
         self.tasks.update_one(
