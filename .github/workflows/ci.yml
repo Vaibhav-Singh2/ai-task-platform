@@ -78,12 +78,12 @@ jobs:
       - name: Update Kubernetes Manifests
         working-directory: ./infra
         run: |
-          sed -i 's|image: .*/ai-task-platform-backend:.*|image: ${{ secrets.DOCKER_USERNAME }}/ai-task-platform-backend:${{ github.sha }}|g' base/backend/deployment.yaml
-          sed -i 's|image: .*/ai-task-platform-frontend:.*|image: ${{ secrets.DOCKER_USERNAME }}/ai-task-platform-frontend:${{ github.sha }}|g' base/frontend/deployment.yaml
-          sed -i 's|image: .*/ai-task-platform-worker:.*|image: ${{ secrets.DOCKER_USERNAME }}/ai-task-platform-worker:${{ github.sha }}|g' base/worker/deployment.yaml
+          sed -i "s|image: .*ai-task-platform-backend.*|image: ${{ secrets.DOCKER_USERNAME }}/ai-task-platform-backend:${{ github.sha }}|g" base/backend/deployment.yaml
+          sed -i "s|image: .*ai-task-platform-frontend.*|image: ${{ secrets.DOCKER_USERNAME }}/ai-task-platform-frontend:${{ github.sha }}|g" base/frontend/deployment.yaml
+          sed -i "s|image: .*ai-task-platform-worker.*|image: ${{ secrets.DOCKER_USERNAME }}/ai-task-platform-worker:${{ github.sha }}|g" base/worker/deployment.yaml
           
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          git add base/*/deployment.yaml
-          git commit -m "Update images to commit ${{ github.sha }}"
+          git add .
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update images to commit ${{ github.sha }}"
           git push
