@@ -12,9 +12,9 @@ from dotenv import load_dotenv
 from pymongo.collection import Collection
 from pymongo import ReturnDocument
 
-from app.db import MongoStore
-from app.processor import process_task
-from app.queue import QueueMessage, RedisQueue
+from .db import MongoStore
+from .processor import process_task
+from .redis_queue import QueueMessage, RedisQueue
 
 load_dotenv()
 
