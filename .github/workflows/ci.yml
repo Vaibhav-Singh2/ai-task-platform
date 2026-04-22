@@ -71,7 +71,7 @@ jobs:
       - name: Checkout Infra Repo
         uses: actions/checkout@v3
         with:
-          repository: your-username/ai-task-platform-infra
+          repository: Vaibhav-Singh2/ai-task-platform-infra
           token: ${{ secrets.PAT_TOKEN }}
           path: infra
 
