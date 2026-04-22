@@ -4,20 +4,7 @@ import { TryCatch } from "@/middlewares/error.js";
 import HttpError from "@/utils/errorHandler.js";
 import { Task, type TaskOperation, type TaskStatus } from "@/models/task.js";
 
-const runOperation = (inputText: string, operation: TaskOperation): string => {
-  switch (operation) {
-    case "uppercase":
-      return inputText.toUpperCase();
-    case "lowercase":
-      return inputText.toLowerCase();
-    case "reverse":
-      return inputText.split("").reverse().join("");
-    case "word_count":
-      return String(inputText.trim().split(/\s+/).filter(Boolean).length);
-    default:
-      return inputText;
-  }
-};
+import { redisClient } from "@/lib/redis.js";
 
 const isValidStatus = (status: string): status is TaskStatus => {
   return ["pending", "running", "success", "failed"].includes(status);
@@ -46,28 +33,30 @@ export const createTask = TryCatch(async (req: Request, res: Response) => {
     throw new HttpError(400, "Invalid operation value");
   }
 
-  const result = runOperation(inputText, operation);
-
   const task = await Task.create({
     userId,
     title,
     inputText,
     operation,
-    status: "success",
-    result,
+    status: "pending",
     logs: [
       {
         level: "info",
         message: "Task queued for processing",
         at: new Date(),
       },
-      {
-        level: "info",
-        message: "Task processed successfully",
-        at: new Date(),
-      },
     ],
   });
+
+  const queueName = process.env.QUEUE_NAME || "task_queue";
+  await redisClient.rPush(
+    queueName,
+    JSON.stringify({
+      taskId: task._id.toString(),
+      operation: task.operation,
+      input: task.inputText,
+    })
+  );
 
   res.status(201).json({
     success: true,
@@ -178,20 +167,31 @@ export const updateTask = TryCatch(async (req: Request, res: Response) => {
     task.status = status;
   }
 
+  let requeue = false;
   if (inputText !== undefined || operation !== undefined) {
-    task.result = runOperation(task.inputText, task.operation);
-    if (task.status === "pending" || task.status === "running") {
-      task.status = "success";
-    }
+    task.status = "pending";
+    requeue = true;
   }
 
   task.logs.push({
     level: "info",
-    message: "Task updated",
+    message: requeue ? "Task updated and re-queued for processing" : "Task updated",
     at: new Date(),
   });
 
   await task.save();
+
+  if (requeue) {
+    const queueName = process.env.QUEUE_NAME || "task_queue";
+    await redisClient.rPush(
+      queueName,
+      JSON.stringify({
+        taskId: task._id.toString(),
+        operation: task.operation,
+        input: task.inputText,
+      })
+    );
+  }
 
   res.status(200).json({
     success: true,

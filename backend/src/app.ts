@@ -4,6 +4,7 @@ import cors from "cors";
 import { errorMiddleware } from "@/middlewares/error.js";
 import morgan from "morgan";
 import { connectDB } from "@/lib/db.js";
+import { connectRedis } from "@/lib/redis.js";
 import dotenv from "dotenv";
 import { rateLimit } from "express-rate-limit";
 import authRoutes from "@/routes/auth.js";
@@ -15,6 +16,7 @@ export const envMode = process.env.NODE_ENV?.trim() || "DEVELOPMENT";
 const port = process.env.PORT || 3000;
 
 connectDB();
+connectRedis().catch(console.error);
 
 const app = express();
 const apiLimiter = rateLimit({

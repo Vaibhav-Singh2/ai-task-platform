@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timezone
+import os
+from openai import OpenAI
 
 SUPPORTED_OPERATIONS = {"uppercase", "lowercase", "reverse", "word_count"}
 
@@ -26,26 +28,49 @@ def process_task(operation: str, input_text: str) -> ProcessedTask:
     logs: list[dict[str, object]] = [
         {
             "level": "info",
-            "message": f"Task processing started for operation '{operation}'",
+            "message": f"Task processing started for operation '{operation}' via OpenAI",
             "at": started_at,
         }
     ]
 
-    if operation == "uppercase":
-        result = input_text.upper()
-    elif operation == "lowercase":
-        result = input_text.lower()
-    elif operation == "reverse":
-        result = input_text[::-1]
-    else:
-        result = str(len([word for word in input_text.split() if word]))
+    client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
-    logs.append(
-        {
-            "level": "info",
-            "message": "Task processing completed successfully",
-            "at": now(),
-        }
-    )
+    try:
+        if operation == "uppercase":
+            system_prompt = "You are a helpful assistant. Convert the given text to uppercase. Return ONLY the uppercase text."
+        elif operation == "lowercase":
+            system_prompt = "You are a helpful assistant. Convert the given text to lowercase. Return ONLY the lowercase text."
+        elif operation == "reverse":
+            system_prompt = "You are a helpful assistant. Reverse the given text. Return ONLY the reversed text."
+        else:
+            system_prompt = "You are a helpful assistant. Count the number of words in the given text. Return ONLY the number as a string."
+
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": input_text}
+            ],
+            temperature=0.0
+        )
+        
+        result = response.choices[0].message.content.strip() if response.choices[0].message.content else ""
+
+        logs.append(
+            {
+                "level": "info",
+                "message": "Task processing completed successfully via OpenAI",
+                "at": now(),
+            }
+        )
+    except Exception as e:
+        logs.append(
+            {
+                "level": "error",
+                "message": f"OpenAI API error: {str(e)}",
+                "at": now(),
+            }
+        )
+        raise e
 
     return ProcessedTask(result=result, logs=logs)
